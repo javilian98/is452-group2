@@ -3,14 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 
 import { money } from "../assets";
-// import { CustomButton  } '../components'
+import { CustomButton } from "../components";
 import { checkIfImage } from "../utils";
 
 import { FormField } from "../components";
 
+import { useStateContext } from "../context";
+
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { createCampaign } = useStateContext();
   const [form, setForm] = useState({
     name: "",
     title: "",
@@ -24,10 +27,23 @@ const CreateCampaign = () => {
     setForm({ ...form, [fieldName]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(form);
+    checkIfImage(form.image, async (exists) => {
+      if (exists) {
+        setIsLoading(true);
+        await createCampaign({
+          ...form,
+          target: ethers.utils.parseUnits(form.target, 18),
+        });
+        setIsLoading(false);
+        navigate("/");
+      } else {
+        alert("Provide valid image URL");
+        setForm({ ...form, image: "" });
+      }
+    });
   };
 
   return (
@@ -105,14 +121,11 @@ const CreateCampaign = () => {
         />
 
         <div className="flex justify-center items-center mt-[40px] ">
-          {/* <CustomButton
-              btnType="submit"
-              title="Submit new campaign"
-              styles="bg-[#1dc071]"
-            /> */}
-          <button className="bg-[#1dc071] text-white py-3 px-4 rounded-[10px]">
-            Submit new campaign
-          </button>
+          <CustomButton
+            btnType="submit"
+            title="Submit new campaign"
+            styles="bg-[#1dc071]"
+          />
         </div>
       </form>
     </div>
