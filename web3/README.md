@@ -1,3 +1,14 @@
+## Step By Step Guide
+
+1. Install npm packages: `npm i`
+2. Create `.env` file according to `.env.sample`
+3. Export environment variables from `.env` file
+    ```bash
+    export $(cat .env | xargs)
+    ```
+4. Run `npm run deploy`
+5. Navigate to given link to deploy contract
+
 ## Getting Started
 
 Create a project using this example:
@@ -25,20 +36,10 @@ to compile your contracts. This will also detect the [Contracts Extensions Docs]
 ## Deploying Contracts
 
 #### Environment Variables
-> [!IMPORTANT]
-> MUST RUN THIS BEFORE DEPLOYING
-
-- For windows Git Bash
-    ```sh
-    set -a
-    source .env
-    set +a
-    ```
-- For Mac/Linux
-    ```sh
-    export $(cat .env | xargs)
-    ```
-
+Export environment variables from `.env` file
+```bash
+export $(cat .env | xargs)
+```
 
 When you're ready to deploy your contracts, just run one of the following command to deploy you're contracts:
 
