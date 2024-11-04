@@ -6,30 +6,30 @@ import { DisplayCampaigns } from "../components";
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [campaigns, setCampaigns] = useState([
-    {
-      owner: "0xabc",
-      title: "Fund Example 1",
-      description: "Description of this campaign",
-      target: 0.15,
-      deadline: 1729437427,
-      amountCollected: 0.1,
-      image:
-        "https://www.geekawhat.com/wp-content/uploads/2024/03/FI_6500X-White-4070-Ti-SUPER-PC-Build.jpg",
-    },
+    // {
+    //   owner: "0xabc",
+    //   title: "Fund Example 1",
+    //   description: "Description of this campaign",
+    //   target: 0.15,
+    //   deadline: 1729437427,
+    //   amountCollected: 0.1,
+    //   image:
+    //     "https://www.geekawhat.com/wp-content/uploads/2024/03/FI_6500X-White-4070-Ti-SUPER-PC-Build.jpg",
+    // },
   ]);
 
   const { address, contract, getCampaigns } = useStateContext();
 
-  // const fetchCampaigns = () => {
-  //   setIsLoading(true)
-  //   const data = await getCampaigns()
-  //   setCampaigns(data)
-  //   setIsLoading(false)
-  // }
+  const fetchCampaigns = async () => {
+    setIsLoading(true);
+    const data = await getCampaigns();
+    setCampaigns(data);
+    setIsLoading(false);
+  };
 
-  // useEffect(() => {
-  //   if (contract) fetchCampaigns()
-  // }, [address, contract])
+  useEffect(() => {
+    if (contract) fetchCampaigns();
+  }, [address, contract]);
 
   return (
     <DisplayCampaigns

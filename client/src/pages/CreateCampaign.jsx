@@ -13,7 +13,7 @@ import { useStateContext } from "../context";
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { createCampaign } = useStateContext();
+  const { createCampaign, connect, address } = useStateContext();
   const [form, setForm] = useState({
     name: "",
     title: "",
@@ -125,6 +125,11 @@ const CreateCampaign = () => {
             btnType="submit"
             title="Submit new campaign"
             styles="bg-[#1dc071]"
+            handleClick={() => {
+              console.log(address);
+              if (address) navigate("/create-campaign");
+              else connect();
+            }}
           />
         </div>
       </form>
