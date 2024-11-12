@@ -92,40 +92,32 @@ contract CrowdFunding {
         require(!campaign.isFinalized, "Campaign already finalized.");
 
         if (campaign.amountCollected >= campaign.target) {
+            // If the target is met, transfer funds to the owner
             campaign.isFinalized = true;
             (bool sent, ) = payable(campaign.owner).call{value: campaign.amountCollected}("");
             require(sent, "Transfer to owner failed.");
             emit CampaignFinalized(_campaignId, campaign.owner, campaign.amountCollected);
         } else {
+            // If the target is not met, enable refunds in RefundMechanism
             refundMechanism.enableRefund(_campaignId, campaign.donators, campaign.donations);
             campaign.isFinalized = true;
             emit RefundTriggered(_campaignId);
-        }
-    }
 
-    function processRefunds(uint256 _campaignId) public {
-        Campaign storage campaign = campaigns[_campaignId];
-        require(campaign.isFinalized, "Campaign not finalized.");
-
-        for (uint256 i = 0; i < campaign.donators.length; i++) {
-            address donator = campaign.donators[i];
-            uint256 refundAmount = refundMechanism.getRefundAmount(_campaignId, donator);
-            if (refundAmount > 0) {
-                refundMechanism.resetRefund(_campaignId, donator);
-                payable(donator).transfer(refundAmount);
+            // Process refunds to each donor
+            for (uint256 i = 0; i < campaign.donators.length; i++) {
+                address donator = campaign.donators[i];
+                uint256 refundAmount = refundMechanism.getRefundAmount(_campaignId, donator);
+                
+                if (refundAmount > 0) {
+                    refundMechanism.resetRefund(_campaignId, donator);
+                    (bool refundSent, ) = payable(donator).call{value: refundAmount}("");
+                    require(refundSent, "Refund transfer failed.");
+                }
             }
         }
     }
 
-    function transferRefund(uint256 _campaignId, address _donor) external {
-        require(msg.sender == address(refundMechanism), "Only RefundMechanism can call this function.");
-        uint256 refundAmount = refundMechanism.getRefundAmount(_campaignId, _donor);
-        require(refundAmount > 0, "No refund available for this donor.");
-
-        refundMechanism.resetRefund(_campaignId, _donor);
-        payable(_donor).transfer(refundAmount);
-    }
-
+    // Get details of a specific campaign, including options
     function getCampaign(uint256 _campaignId)
         public
         view
