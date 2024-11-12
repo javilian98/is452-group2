@@ -60,4 +60,40 @@ contract VotingMechanism {
             }
         }
     }
+
+    // Get the voting percentage for each option in a campaign
+    function getVotingPercentage(uint256 _campaignId) public view returns (uint256[] memory) {
+        (, , , , , , , , , string[] memory options, ) = crowdfunding.getCampaign(_campaignId);
+        uint256 totalTokens = 0;
+        uint256[] memory percentages = new uint256[](options.length);
+
+        // Calculate total tokens used in voting
+        for (uint256 i = 1; i <= options.length; i++) {
+            totalTokens += totalVotes[_campaignId][i];
+        }
+
+        // Calculate the percentage for each option
+        for (uint256 i = 1; i <= options.length; i++) {
+            if (totalTokens > 0) {
+                percentages[i - 1] = (totalVotes[_campaignId][i] * 100) / totalTokens;
+            } else {
+                percentages[i - 1] = 0; // No votes, so 0% for each option
+            }
+        }
+
+        return percentages;
+    }
+
+    // Get the total votes (tokens) for each option in a campaign
+    function getTotalVotes(uint256 _campaignId) public view returns (uint256[] memory) {
+        (, , , , , , , , , string[] memory options, ) = crowdfunding.getCampaign(_campaignId);
+        uint256[] memory votes = new uint256[](options.length);
+
+        // Populate total votes for each option
+        for (uint256 i = 1; i <= options.length; i++) {
+            votes[i - 1] = totalVotes[_campaignId][i];
+        }
+
+        return votes;
+    }
 }
