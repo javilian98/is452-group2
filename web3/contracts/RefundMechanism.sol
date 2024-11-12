@@ -19,7 +19,6 @@ contract RefundMechanism {
     function enableRefund(uint256 _campaignId, address[] memory _donators, uint256[] memory _donations) external {
         require(msg.sender == crowdfunding, "Only CrowdFunding can enable refunds.");
 
-        // Map each donor's address to their respective refund amount
         for (uint256 i = 0; i < _donators.length; i++) {
             refunds[_campaignId][_donators[i]] = _donations[i];
         }
@@ -27,25 +26,12 @@ contract RefundMechanism {
         emit RefundEnabled(_campaignId);
     }
 
-    // Process refunds for all donors in a specific campaign
-    function processRefund(uint256 _campaignId, address[] memory _donators) external {
-        require(msg.sender == crowdfunding, "Only CrowdFunding can process refunds.");
-
-        for (uint256 i = 0; i < _donators.length; i++) {
-            address donator = _donators[i];
-            uint256 refundAmount = refunds[_campaignId][donator];
-            
-            if (refundAmount > 0) {
-                refunds[_campaignId][donator] = 0; // Set refund to zero to prevent double refunds
-                (bool sent, ) = payable(donator).call{value: refundAmount}("");
-                require(sent, "Refund transfer failed.");
-                emit RefundProcessed(_campaignId, donator, refundAmount);
-            }
-        }
-    }
-
-    // Getter function to retrieve the refund amount for a specific campaign and donor
     function getRefundAmount(uint256 _campaignId, address _donor) external view returns (uint256) {
         return refunds[_campaignId][_donor];
+    }
+
+    function resetRefund(uint256 _campaignId, address _donor) external {
+        require(msg.sender == crowdfunding, "Only CrowdFunding can reset refunds.");
+        refunds[_campaignId][_donor] = 0;
     }
 }

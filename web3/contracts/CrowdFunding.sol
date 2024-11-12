@@ -35,7 +35,6 @@ contract CrowdFunding {
         refundMechanism = RefundMechanism(_refundMechanismAddress);
     }
 
-    // Create a new campaign
     function createCampaign(
         address _owner,
         string memory _title,
@@ -61,10 +60,9 @@ contract CrowdFunding {
         return numberOfCampaigns - 1;
     }
 
-    // Add options for voting, only campaign owner can add options
     function addOptions(uint256 _campaignId, string[] memory _options) public {
         Campaign storage campaign = campaigns[_campaignId];
-        require(msg.sender == campaign.owner, "Only owner can add options.");
+        require(msg.sender == campaign.owner, "Only the campaign owner can add options.");
         require(campaign.options.length == 0, "Options already set.");
 
         for (uint256 i = 0; i < _options.length; i++) {
@@ -72,7 +70,6 @@ contract CrowdFunding {
         }
     }
 
-    // Donate to a campaign and mint tokens
     function donate(uint256 _campaignId) public payable {
         Campaign storage campaign = campaigns[_campaignId];
         require(block.timestamp < campaign.deadline, "Campaign ended.");
@@ -82,32 +79,41 @@ contract CrowdFunding {
         campaign.donations.push(msg.value);
         campaign.amountCollected += msg.value;
 
-        // Calculate and assign tokens based on the donation amount
         uint256 tokens = (msg.value * tokensPerEther) / 1 ether;
         tokenBalance[_campaignId][msg.sender] += tokens;
 
         emit Donated(_campaignId, msg.sender, msg.value);
     }
 
-    // Finalize the campaign, either transferring funds to the owner or triggering refunds
     function finalizeCampaign(uint256 _campaignId) public {
         Campaign storage campaign = campaigns[_campaignId];
-        require(msg.sender == campaign.owner, "Only the campaign owner can finalize this campaign."); // Restrict access
-        require(block.timestamp >= campaign.deadline, "Campaign is still ongoing.");
+        require(msg.sender == campaign.owner, "Only the campaign owner can finalize this campaign.");
+        // require(block.timestamp >= campaign.deadline, "Campaign is still ongoing.");
         require(!campaign.isFinalized, "Campaign already finalized.");
 
         if (campaign.amountCollected >= campaign.target) {
-            // If the target is met, transfer funds to the owner
             campaign.isFinalized = true;
             (bool sent, ) = payable(campaign.owner).call{value: campaign.amountCollected}("");
             require(sent, "Transfer to owner failed.");
             emit CampaignFinalized(_campaignId, campaign.owner, campaign.amountCollected);
         } else {
-            // If the target is not met, enable and process refunds in RefundMechanism
             refundMechanism.enableRefund(_campaignId, campaign.donators, campaign.donations);
-            refundMechanism.processRefund(_campaignId, campaign.donators); // Pass the list of donators
             campaign.isFinalized = true;
             emit RefundTriggered(_campaignId);
+        }
+    }
+
+    function processRefunds(uint256 _campaignId) public {
+        Campaign storage campaign = campaigns[_campaignId];
+        require(campaign.isFinalized, "Campaign not finalized.");
+
+        for (uint256 i = 0; i < campaign.donators.length; i++) {
+            address donator = campaign.donators[i];
+            uint256 refundAmount = refundMechanism.getRefundAmount(_campaignId, donator);
+            if (refundAmount > 0) {
+                refundMechanism.resetRefund(_campaignId, donator);
+                payable(donator).transfer(refundAmount);
+            }
         }
     }
 
@@ -116,12 +122,10 @@ contract CrowdFunding {
         uint256 refundAmount = refundMechanism.getRefundAmount(_campaignId, _donor);
         require(refundAmount > 0, "No refund available for this donor.");
 
-        // Transfer the refund amount
+        refundMechanism.resetRefund(_campaignId, _donor);
         payable(_donor).transfer(refundAmount);
-    }   
+    }
 
-
-    // Get details of a specific campaign, including options
     function getCampaign(uint256 _campaignId)
         public
         view
@@ -155,7 +159,6 @@ contract CrowdFunding {
         );
     }
 
-    // Get details of all campaigns
     function getCampaigns() public view returns (Campaign[] memory) {
         Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
 
@@ -167,13 +170,11 @@ contract CrowdFunding {
         return allCampaigns;
     }
 
-    // Deduct tokens from a donor's balance
     function deductTokens(uint256 _campaignId, address _donor, uint256 _tokens) external {
         require(tokenBalance[_campaignId][_donor] >= _tokens, "Not enough tokens");
         tokenBalance[_campaignId][_donor] -= _tokens;
     }
 
-    // Get the total token balance of a donor for a specific campaign
     function getTokenBalance(uint256 _campaignId, address _donor) public view returns (uint256) {
         return tokenBalance[_campaignId][_donor];
     }
