@@ -13,12 +13,26 @@ const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
   const { contract } = useContract(
-    import.meta.env.VITE_DEPLOYED_CONTRACT_ADDRESS
+    import.meta.env.VITE_DEPLOYED_CROWDFUNDING_CONTRACT_ADDRESS
   );
+  const { contract: votingContract } = useContract(
+    import.meta.env.VITE_DEPLOYED_VOTING_CONTRACT_ADDRESS
+  );
+  // const { contract: refundContract } = useContract(
+  //   import.meta.env.VITE_DEPLOYED_REFUND_CONTRACT_ADDRESS
+  // );
+
   const { mutateAsync: createCampaign } = useContractWrite(
     contract,
     "createCampaign"
   );
+  const { mutateAsync: addOptions } = useContractWrite(contract, "addOptions");
+  const { mutateAsync: finalizeCampaign } = useContractWrite(
+    contract,
+    "finalizeCampaign"
+  );
+
+  const { mutateAsync: vote } = useContractWrite(votingContract, "vote");
 
   const address = useAddress();
   const connect = useMetamask();
@@ -37,6 +51,19 @@ export const StateContextProvider = ({ children }) => {
       });
 
       console.log("contract call success", data);
+      return data;
+    } catch (error) {
+      console.log("contract call failure", error);
+    }
+  };
+
+  const publishOptions = async (form, campaignId) => {
+    try {
+      const data = await addOptions({
+        args: [campaignId, form.options],
+      });
+
+      console.log("contract call success", data);
     } catch (error) {
       console.log("contract call failure", error);
     }
@@ -44,8 +71,9 @@ export const StateContextProvider = ({ children }) => {
 
   const getCampaigns = async () => {
     const campaigns = await contract.call("getCampaigns");
+    console.log("campaigns ", campaigns);
 
-    const parsedCampaings = campaigns.map((campaign, i) => ({
+    const parsedCampaigns = campaigns.map((campaign, i) => ({
       owner: campaign.owner,
       title: campaign.title,
       description: campaign.description,
@@ -54,11 +82,17 @@ export const StateContextProvider = ({ children }) => {
       amountCollected: ethers.utils.formatEther(
         campaign.amountCollected.toString()
       ),
+      donators: campaign.donators,
+      donations: campaign.donations.map((donation) =>
+        ethers.utils.formatEther(donation.toString())
+      ), // Format each BigNumber in the donations array
+      options: campaign.options,
+      isFinalized: campaign.isFinalized,
       image: campaign.image,
       pId: i,
     }));
 
-    return parsedCampaings;
+    return parsedCampaigns;
   };
 
   const getUserCampaigns = async () => {
@@ -72,7 +106,7 @@ export const StateContextProvider = ({ children }) => {
   };
 
   const donate = async (pId, amount) => {
-    const data = await contract.call("donateToCampaign", [pId], {
+    const data = await contract.call("donate", [pId], {
       value: ethers.utils.parseEther(amount),
     });
 
@@ -96,6 +130,43 @@ export const StateContextProvider = ({ children }) => {
     return parsedDonations;
   };
 
+  const publishFinalizeCampaign = async (campaignId) => {
+    try {
+      const data = await finalizeCampaign({
+        args: [campaignId],
+      });
+
+      console.log("contract call success", data);
+    } catch (error) {
+      console.log("contract call failure", error);
+    }
+  };
+
+  const publishVote = async (campaignId, option, tokens) => {
+    try {
+      const data = await vote({
+        args: [campaignId, option, tokens],
+      });
+
+      console.log("contract call success", data);
+    } catch (error) {
+      console.log("contract call failure", error);
+    }
+  };
+
+  const getTotalVotes = async (campaignId, optionId) => {
+    try {
+      const data = await votingContract.call("totalVotes", [
+        campaignId,
+        optionId,
+      ]);
+      console.log("contract call success", data);
+      return data.toString();
+    } catch (error) {
+      console.log("contract call failure", error);
+    }
+  };
+
   return (
     <StateContext.Provider
       value={{
@@ -103,9 +174,13 @@ export const StateContextProvider = ({ children }) => {
         contract,
         connect,
         createCampaign: publishCampaign,
+        addOptions: publishOptions,
+        addVote: publishVote,
         getCampaigns,
         getUserCampaigns,
+        getTotalVotes,
         donate,
+        finalizeTheCampaign: publishFinalizeCampaign,
         getDonations,
       }}
     >

@@ -33,13 +33,15 @@ contract VotingMechanism {
         require(_userOptionId <= options.length, "Invalid option ID.");
 
         // Check if the voter is a donor by ensuring they have a token balance
-        uint256 donorTokens = crowdfunding.getTokenBalance(_campaignId, msg.sender);
-        require(donorTokens > 0, "You are not a donor to this campaign.");
-        require(_tokens > 0, "Must vote with at least 1 token.");
-        require(donorTokens >= _tokens, "Not enough tokens to vote.");
 
-        // Deduct tokens from the donor's balance in CrowdFunding
-        crowdfunding.deductTokens(_campaignId, msg.sender, _tokens);
+        // uint256 donorTokens = crowdfunding.getTokenBalance(_campaignId, msg.sender);
+        // require(donorTokens > 0, "You are not a donor to this campaign.");
+        
+        require(_tokens > 0, "Must vote with at least 1 token.");
+        // require(donorTokens >= _tokens, "Not enough tokens to vote.");
+
+        // // Deduct tokens from the donor's balance in CrowdFunding
+        // crowdfunding.deductTokens(_campaignId, msg.sender, _tokens);
 
         // Use _userOptionId directly in totalVotes, keeping it 1-based
         totalVotes[_campaignId][_userOptionId] += _tokens;
