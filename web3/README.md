@@ -1,72 +1,11 @@
-## Step By Step Guide
+## Step-by-step set-up guide
 
-1. Install npm packages: `npm i`
-2. Create `.env` file according to `.env.sample`
-3. Export environment variables from `.env` file
-    ```bash
-    export $(cat .env | xargs)
-    ```
-4. Run `npm run deploy`
-5. Navigate to given link to deploy contract
+Inside web3 folder:
 
-## Getting Started
+1. duplicate .env.sample and rename to .env
+2. paste your thirdweb secret key to an environment variable called SECRET_KEY
+3. paste your alchemy api key (create your alchemy account: https://www.alchemy.com/) to an environment variable called ALCHEMY_API_KEY.
 
-Create a project using this example:
-
-```bash
-npx thirdweb create --contract --template hardhat-javascript-starter
-```
-
-You can start editing the page by modifying `contracts/Contract.sol`.
-
-To add functionality to your contracts, you can use the `@thirdweb-dev/contracts` package which provides base contracts and extensions to inherit. The package is already installed with this project. Head to our [Contracts Extensions Docs](https://portal.thirdweb.com/contractkit) to learn more.
-
-## Building the project
-
-After any changes to the contract, run:
-
-```bash
-npm run build
-# or
-yarn build
-```
-
-to compile your contracts. This will also detect the [Contracts Extensions Docs](https://portal.thirdweb.com/contractkit) detected on your contract.
-
-## Deploying Contracts
-
-#### Environment Variables
-Export environment variables from `.env` file
-```bash
-export $(cat .env | xargs)
-```
-
-When you're ready to deploy your contracts, just run one of the following command to deploy you're contracts:
-
-```bash
-npm run deploy
-# or
-yarn deploy
-```
-
-> [!IMPORTANT]
-> This requires a secret key to make it work. Get your secret key [here](https://thirdweb.com/dashboard/settings/api-keys).
-> Pass your secret key as a value after `-k` flag.
-> ```bash
-> npm run deploy -- -k <your-secret-key>
-> # or
-> yarn deploy -k <your-secret-key>
-
-## Releasing Contracts
-
-If you want to release a version of your contracts publicly, you can use one of the followings command:
-
-```bash
-npm run release
-# or
-yarn release
-```
-
-## Join our Discord!
-
-For any questions, suggestions, join our discord at [https://discord.gg/thirdweb](https://discord.gg/thirdweb).
+4. Ignore CLIENT_ID (not in used inside web3 folder)
+5. in your terminal pointing to web3 directory, run npm i to install dependencies
+6. run the command to deploy the smartcontract: npx thirdweb@latest deploy -k <thirdweb secret key value>, replace <thirdweb secret key value> with your actual thirdweb secret key that you copied earlier
