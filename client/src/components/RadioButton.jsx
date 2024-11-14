@@ -13,7 +13,7 @@ const RadioButton = ({ value, handleChange }) => {
       />
       <label
         htmlFor={value}
-        className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+        className="ms-2 text-sm font-medium text-white"
       >
         {value}
       </label>
