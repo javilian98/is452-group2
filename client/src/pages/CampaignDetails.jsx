@@ -196,7 +196,7 @@ const CampaignDetails = () => {
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
           <div>
-            <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#1c1c24] uppercase">
               Creator
             </h4>
 
@@ -210,7 +210,7 @@ const CampaignDetails = () => {
               </div>
 
               <div>
-                <h4 className="font-epilogue font-semibold text-[14px] text-white break-all">
+                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">
                   {state.owner}
                 </h4>
                 <p className="mt-[4px] font-epilogue font-normaal text-[12px] text-[#808191]">
@@ -368,7 +368,7 @@ const CampaignDetails = () => {
 
           {!state.isFinalized && (
             <div className="mt-[20px]">
-              <h4 className="mt-[40px] mb-[20px] font-epilogue font-semibold text-[18px] text-white">
+              <h4 className="mt-[40px] mb-[20px] font-epilogue font-semibold text-[18px] text-[#1c1c24]">
                 Reached your target?
               </h4>
               <CustomButton
