@@ -286,7 +286,7 @@ const CampaignDetails = () => {
           {/* Vote Results */}
           {/* {!state.isFinalized && ( */}
           <div>
-            <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#1c1c24] uppercase">
               Vote Results
             </h4>
 
@@ -314,7 +314,7 @@ const CampaignDetails = () => {
 
           {!state.isFinalized ? (
             <>
-              <h4 className="font-epilogue font-semibold text-[18px] text-white uppercase">
+              <h4 className="font-epilogue font-semibold text-[18px] text-[#1c1c24] uppercase">
                 Fund
               </h4>
 
